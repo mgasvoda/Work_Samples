@@ -1,2 +1,2 @@
 # DataCentralization
-Data centralization project for marketing analytics
+Data centralization project for marketing analytics. Pulls in data from various applications - here 2 different CRM systems and a call tracking system (more coming in the near future) and sends them through to a remote hosted MySql database with copies of the table schema from each application. This data can then be pulled into various BI and visualization tools for further analysis. 
