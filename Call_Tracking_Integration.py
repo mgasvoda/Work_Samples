@@ -1,7 +1,9 @@
+"""Pulls information tables from Call Tracking Metrics service."""
+
+
 import MySqlInsert
 import requests
-from os import urandom
-from base64 import standard_b64encode, b64encode
+from base64 import standard_b64encode
 
 access_key = 'CTM Access_Key'
 secret_key = 'CTM Secret_Key'
@@ -15,46 +17,22 @@ host = 'db_IP'
 database = 'db_name'
 
 mysql = MySqlInsert.sql_monster(user, password, host, database)
-
-
 auth_endcoded = standard_b64encode(basic_auth)
-
-
-def send():
-    # method and params outlined at:
-    # https://YOURAPP.marketingautomation.services/settings/pubapireference#apimethods
-
-    # Sets session ID using urandom for enhanced security
-    request = urandom(24)
-    requestID = b64encode(request).decode('utf-8')
-
-    querystring = {"names": "1", "all": "1"}
-
-    # The Sharpspring reference will show encoding the URL with
-    # http_build_query, but this is the output
-    url = "https://api.calltrackingmetrics.com/api/v1/accounts"
-    headers = {
-        'authorization': 'Basic {}'.format(auth_endcoded),
-        'content-type': "application/json"
-    }
-
-    # The requests library replaces cURL used in PHP - much simpler.
-    # Note that all SharpSpring API calls use the POST method
-    response = requests.request("GET", url, headers=headers, params=querystring)
-
-    print(response.text)
+headers = {
+    'authorization': 'Basic {}'.format(auth_endcoded),
+    'content-type': "application/json"
+}
 
 
 def get_call_list(page):
-    url = "https://api.calltrackingmetrics.com/api/v1/accounts/{}/calls".format(account_id)
+    """Retrieve desired information from Call Tracking Metrics."""
+    url = "https://api.calltrackingmetrics.com/api/v1/accounts/{}/calls"\
+        .format(account_id)
     querystring = {"page": page}
 
-    headers = {
-        'authorization': 'Basic {}'.format(test),
-        'content-type': "application/json"
-    }
-
-    response = requests.request("GET", url, headers=headers, params=querystring)
+    response = requests.request("GET", url,
+                                headers=headers,
+                                params=querystring)
 
     return response.text
 
@@ -76,6 +54,8 @@ if __name__ == '__main__':
         x = x.replace('false', 'False')
         x = eval(x)
         y = x['calls']
+
+        # format converion to avoid errors on SQL insert
         for l in y:
             for key in keys:
                 if key not in l.keys():

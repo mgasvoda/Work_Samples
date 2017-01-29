@@ -1,3 +1,5 @@
+"""Retrieves information from Infusionsoft service for import."""
+
 import xmlrpclib
 import datetime
 import MySqlInsert
@@ -15,8 +17,7 @@ mysql.x = 'Id'
 
 
 def get_payments():
-
-    #  I want to select
+    """Retrieve ecommerce information."""
     fields = ['ChargeId', 'ContactId', 'Id', 'PayAmt', 'PayDate', 'PayType']
     query = {'Id': "%"}
 
@@ -52,8 +53,7 @@ def get_payments():
 
 
 def get_contacts():
-
-    #  I want to select
+    """Retrieve contact information including leadsource."""
     fields = ['Id', 'FirstName', 'LastName', 'Email', 'Leadsource']
     query = {'Id': "%"}
 
@@ -86,7 +86,6 @@ def get_contacts():
 
 
 if __name__ == '__main__':
-    # print 'getting there'
     get_payments()
     get_contacts()
     mysql.close_cnx()

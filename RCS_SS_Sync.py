@@ -18,10 +18,12 @@ mysql = MySqlInsert.sql_monster(db_user, db_pass, db_host, database)
 
 
 def send(m, p):
-    # SharpSpring method and params outlined at:
-    # https://YOURAPP.marketingautomation.services/settings/pubapireference#apimethods
+    """Transfer requests to SharpSpring.
 
-    # Sets session ID using urandom for enhanced security
+    SharpSpring method and params outlined at:
+    https://YOURAPP.marketingautomation.services/settings/pubapireference#apimethods
+
+    """
     request = urandom(24)
     requestID = b64encode(request).decode('utf-8')
 
@@ -33,7 +35,8 @@ def send(m, p):
 
     # The Sharpspring reference will show encoding the URL with
     # http_build_query, but this is the output
-    url = "http://api.sharpspring.com/pubapi/v1/?accountID={}&secretKey={}".format(account_id, secret_key)
+    url = "http://api.sharpspring.com/pubapi/v1/?accountID={}&secretKey={}"\
+        .format(account_id, secret_key)
     # Important - all requests must be sent in JSON format
     dataj = json.dumps(data)
 
@@ -48,6 +51,7 @@ def send(m, p):
 
 
 def sync(table, db_table, record):
+    """Send information through to database."""
     count = 0
     page = 0
 
@@ -70,7 +74,6 @@ def sync(table, db_table, record):
     return count
 
 
-# Sample call for testing purposes
 if __name__ == '__main__':
     sync('getLeads', 'TABLENAME', 'lead')
     sync('getOpportunities', 'TABLENAME', 'opportunity')
