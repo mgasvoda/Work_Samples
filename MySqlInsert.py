@@ -1,9 +1,17 @@
+"""Handles the sql_monster class for interfacing with remote databases."""
+
 import mysql.connector
 from mysql.connector import errorcode
 
+
 class sql_monster:
+    """SQL connection for interfacing with remote database.
+
+    Built for and tested with MariaDB on a remote hostgator server.
+    """
 
     def __init__(self, username, password, host, database):
+        """Initiate database connection."""
         self.username = username
         self.password = password
         self.host = host
@@ -11,8 +19,10 @@ class sql_monster:
         self.x = 'id'
 
         try:
-            cnx = mysql.connector.connect(user=self.username, password=self.password,
-                                          host=self.host, database=self.database)
+            cnx = mysql.connector.connect(user=self.username,
+                                          password=self.password,
+                                          host=self.host,
+                                          database=self.database)
             self.cnx = cnx
 
         except mysql.connector.Error as err:
@@ -24,6 +34,12 @@ class sql_monster:
                 print(err)
 
     def removeDupes(self, cursor, data, table):
+        """Clear duplicates from import data.
+
+        Currently only checks off of "id" field, can be
+        modified for greater flexibility.
+
+        """
         result = []
         ids = []
         unique = 0
@@ -47,6 +63,7 @@ class sql_monster:
 
     @staticmethod
     def generate_sql(table, variables):
+        """Generate insert statement for use in executemany."""
         col_hold = ''
         val_hold = ''
         count = 0
@@ -66,26 +83,39 @@ class sql_monster:
         return result
 
     def insert_sql(self, table, start_data):
-            cursor = self.cnx.cursor()
-            null = ''
-            data_raw = start_data
+        """Handle the import of data into the remote database.
 
-            sql = self.generate_sql(table, data_raw[0].keys())
+        Batching is recommended for larger jobs (20k + rows) as timeout issues
+        have occurred.
 
-            for x in data_raw:
-                for attr in x:
-                    if x[attr] is None:
-                        x[attr] = null
+        """
+        cursor = self.cnx.cursor()
+        null = ''
+        data_raw = start_data
 
-            data = self.removeDupes(cursor, data_raw, table)
+        sql = self.generate_sql(table, data_raw[0].keys())
 
-            cursor.executemany(sql, data)
+        for x in data_raw:
+            for attr in x:
+                if x[attr] is None:
+                    x[attr] = null
 
-            self.cnx.commit()
-            cursor.close()
+        data = self.removeDupes(cursor, data_raw, table)
+
+        cursor.executemany(sql, data)
+
+        self.cnx.commit()
+        cursor.close()
 
     @staticmethod
     def generate_table(keys):
+        """Generate SQL for large table creation.
+
+        Data types are set automatically and manipulated later for
+        simplicity and speed, bypassing an unsolved import error when
+        doing bulk uploads.
+
+        """
         name = 'Test'
         col_hold = ''
         count = 0
@@ -102,4 +132,10 @@ class sql_monster:
         return result
 
     def close_cnx(self):
+        """End connection.
+
+        Allowing the session to be safely terminated without
+        data loss.
+
+        """
         self.cnx.close()
